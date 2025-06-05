@@ -1,3 +1,6 @@
+"""
+Проект по машинному обучению
+"""
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,9 +15,9 @@ def run(episodes, is_training=True, render=False, reward_shaping=False):
     vel_space = np.linspace(env.observation_space.low[1], env.observation_space.high[1], 40)    # Between -0.07 and 0.07
 
     if is_training:
-        qtable = np.random.uniform(0, 1, (len(pos_space), len(vel_space), env.action_space.n))  # init a 20x20x3 array
+        qtable = np.random.uniform(0, 1, (len(pos_space), len(vel_space), env.action_space.n))  # init array
     else:
-        qtable = np.load('data/qtable.npy')
+        qtable = np.load(f'data/qtable{episodes}.npy')
     learning_rate_a = 0.1  # alpha or learning rate
     discount_factor_g = 0.95  # gamma or discount factor.
 
@@ -47,7 +50,7 @@ def run(episodes, is_training=True, render=False, reward_shaping=False):
             new_state_v = np.digitize(new_state[1], vel_space)
 
             if reward_shaping:
-                reward += 300 * (discount_factor_g * abs(new_state_v) - abs(state_v))
+                reward += 10 * (discount_factor_g * abs(new_state_v) - abs(state_v))
 
             if is_training:
                 qtable[state_p, state_v, action] = qtable[state_p, state_v, action] + learning_rate_a * (
@@ -80,14 +83,14 @@ def run(episodes, is_training=True, render=False, reward_shaping=False):
     if is_training:
         if reward_shaping:
             plt.savefig(f'plots/mountain_car_reward_shaping{episodes}.png')
-            mean_rewards.tofile('data/data_reward_shaping{episodes}.csv', sep=',')
+            mean_rewards.tofile(f'data/data_reward_shaping{episodes}.csv', sep=',')
         else:
             plt.savefig(f'plots/mountain_car{episodes}.png')
             mean_rewards.tofile(f'data/data{episodes}.csv', sep=',')
 
 
 if __name__ == '__main__':
-    # run(5000, is_training=True, render=False, reward_shaping=False)
+    # run(5000, is_training=True, render=False, reward_shaping=True)
 
     run(10, is_training=False, render=True)
 
